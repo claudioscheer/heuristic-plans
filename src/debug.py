@@ -14,29 +14,36 @@ from pddl.action import Action
 
 class AdditiveHeuristic(Heuristic):
     def h(self, actions, state, goals):
-        reachable = [state]
+        reachable = state
         goals_missing = goals[0]
         goals_reached = None
-        last_state = [frozenset()]
+        last_state = None
         add = 0
-        level = 0
-        while last_state[level] != reachable[level]:
-            goals_reached = goals_missing.intersection(reachable[level])
-            if len(goals_reached) > 0:
-                add += level * len(goals_reached)
+        costs = {p: 0 for p in state}
+        while last_state != reachable:
+            goals_reached = goals_missing.intersection(reachable)
+            if goals_reached:
+                add += sum(costs[g] for g in goals_reached)
                 goals_missing = goals_missing.difference(goals_reached)
-            if len(goals_missing) == 0:
+            if not goals_missing:
                 return add
 
-            last_state.append(
-                frozenset(
-                    [a for a in actions if a.positive_preconditions.issubset(reachable[level])]
-                )
-            )
-            reachable.append(
-                reachable[level].union([pre for a in last_state[level] for pre in a.add_effects])
-            )
-            level += 1
+            last_state = reachable
+
+            for a in actions:
+                if a.positive_preconditions <= last_state:
+                    new_reachable = a.add_effects - reachable
+                    for eff in new_reachable:
+                        if eff in costs:
+                            old_costs = costs[eff]
+                            costs[eff] = min(
+                                sum(costs[pre] for pre in a.positive_preconditions) + 1, costs[eff]
+                            )
+                            if costs[eff] != old_costs:
+                                pass
+                        else:
+                            costs[eff] = sum(costs[pre] for pre in a.positive_preconditions) + 1
+                    reachable = reachable.union(new_reachable)
         return float("inf")
 
 
