@@ -42,15 +42,15 @@
 
 \title{Heuristics and A* implementations}
 \author{Claudio Scheer\\
-    Master's Degree in Computer Science\\
-    Pontifical Catholic University of Rio Grande do Sul - PUCRS\\
-    Porto Alegre - RS, Brazil\\
+  Master's Degree in Computer Science\\
+  Pontifical Catholic University of Rio Grande do Sul - PUCRS\\
+  Porto Alegre - RS, Brazil\\
 }
 \maketitle
 \begin{abstract}
-    \begin{quote}
-        AAAI creates proceedings, working notes, and technical reports directly from electronic source furnished by the authors. To ensure that all papers in the publication have a uniform appearance, authors must adhere to the following instructions.
-    \end{quote}
+  \begin{quote}
+    AAAI creates proceedings, working notes, and technical reports directly from electronic source furnished by the authors. To ensure that all papers in the publication have a uniform appearance, authors must adhere to the following instructions.
+  \end{quote}
 \end{abstract}
 
 
@@ -71,7 +71,7 @@ In this section, I discuss the different heuristics implemented in the Jupyter n
 \subsection{$h_{max}$ heuristic}
 In a nutshell, this heuristic returns the maximum cost to achieve a goal. From an initial state, the heuristic returns the longest path to reach all goals.
 
-\lstinputlisting[caption={$h_{max}$ implementation}, style=pythonstyle, label=lst:h_max_python, escapechar=|]{code/h_max.py}
+\lstinputlisting[caption={$h_{max}$ implementation}, style=pythonstyle, label=lst:h_max_python, escapechar=|]{code/h_max.txt}
 
 In the Listing~\ref{lst:h_max_python}, the function \textit{h} returns the maximum cost to reach the \textit{goals} from an initial \textit{state}, considering a set of possible \textit{actions}.
 
@@ -80,37 +80,49 @@ The first reachable states are the initial states, as shown in line~\ref{line:re
 When the goals are not in the reachable state, the algorithm takes two step:
 
 \begin{itemize}
-    \item line~\ref{line:actions_applicable:h_max_python}: get all actions in which the preconditions are applicable to the current set of reachable actions.
-    \item line~\ref{line:new_reachable:h_max_python}: get the effects from the actions applicable to the current reachable state. Each time the algorithm performs this step, the reachable state becomes larger, that is, it is more likely that the goals are in the reachable state.
+  \item line~\ref{line:actions_applicable:h_max_python}: get all actions in which the preconditions are applicable to the current set of reachable actions.
+  \item line~\ref{line:new_reachable:h_max_python}: get the effects from the actions applicable to the current reachable state. Each time the algorithm performs this step, the reachable state becomes larger, that is, it is more likely that the goals are in the reachable state.
 \end{itemize}
 
-At least, in line~\ref{line:test_unreachable:h_max_python}, it is tested whether the new reachable states are the same as the current reachable state. If true, there are no more states to reach and the heuristic has not achieved the goals. Therefore, \textit{infinite} is returned. When there are more states to test, the maximum cost is increased until all goals are reached.
+At least, in line~\ref{line:test_unreachable:h_max_python}, it is tested whether the new reachable states are the same as the current reachable state. If true, there are no more states to reach and the heuristic has not achieved the goals. Therefore, $\inf$ is returned. When there are more states to test, the maximum cost is increased until all goals are reached.
 
 \subsection{$h_{add}$ heuristic}
+
+In a nutshell, this heuristic returns the sum of all the costs to reach the goals. The Listing~\ref{lst:h_add_python} shows the algorithm that performs this heuristic.
+
+\lstinputlisting[caption={$h_{add}$ implementation}, style=pythonstyle, label=lst:h_add_python, escapechar=|]{code/h_add.txt}
+
+Similar to the $h_{max}$ heuristic, the first reachable state will be the initial state and the cost of reaching goals that are in the initial state, is $0$ (line~\ref{line:initial_costs:h_add_python}). As we need to add the cost of reaching all goals, it is necessary to maintain a set of all goals that have not yet been achieved.
+
+When a goal is reached in the current reachable state (line\ref{line:get_goal_reached:h_add_python}), the cost of all goals reached is added to the variable \textit{add}, as shown in line~\ref{line:reached_goal:h_add_python}.
+
+After reaching all the goals, the variable \textit{add} is returned (line~\ref{line:return_add:h_add_python}). If some goal cannot be reached, at some point in the execution, the previous state will be equal to the reachable state, and then return $\inf$ (line~\ref{line:return_inf:h_add_python}).
+
+The first step to get the next reachable state is to filter only the actions applicable to the current state and obtain the effects of those actions (line~\ref{line:new_reachable:h_add_python}). After that, the cost of each effect is calculated and added to the variable \textit{cost} (line~\ref{line:add_effect_cost:h_add_python}).
 
 \section{Formatting Requirements in Brief}
 We need source and PDF files that can be used in a variety of ways and can be output on a variety of devices. AAAI imposes some requirements on your source and PDF files that must be followed. Most of these requirements are based on our efforts to standardize conference manuscript properties and layout. These requirements are as follows, and all papers submitted to AAAI for publication must comply:
 
 \begin{itemize}
-    \item Your .tex file must compile in PDF\LaTeX{} --- \textbf{ no .ps or .eps figure files.}
-    \item All fonts must be embedded in the PDF file --- \textbf{ this includes your figures.}
-    \item Modifications to the style sheet (or your document) in an effort to avoid extra page charges are NOT allowed.
-    \item No type 3 fonts may be used (even in illustrations).
-    \item Your title must follow US capitalization rules.
-    \item \LaTeX{} documents must use the Times or Nimbus font package (do not use Computer Modern for the text of your paper).
-    \item No \LaTeX{} 209 documents may be used or submitted.
-    \item Fonts that require non-English language support (CID and Identity-H) must be converted to outlines or removed from the document (even if they are in a graphics file embedded in the document).
-    \item Two-column format in AAAI style is required for all papers.
-    \item The paper size for final submission must be US letter. No exceptions.
-    \item The source file must exactly match the PDF.
-    \item The document margins must be as specified in the formatting instructions.
-    \item The number of pages and the file size must be as specified for your event.
-    \item No document may be password protected.
-    \item Neither the PDFs nor the source may contain any embedded links or bookmarks.
-    \item Your source and PDF must not have any page numbers, footers, or headers.
-    \item Your PDF must be compatible with Acrobat 5 or higher.
-    \item Your \LaTeX{} source file (excluding references) must consist of a \textbf{single} file (use of the ``input" command is not allowed.
-    \item Your graphics must be sized appropriately outside of \LaTeX{} (do not use the ``clip" command) .
+  \item Your .tex file must compile in PDF\LaTeX{} --- \textbf{ no .ps or .eps figure files.}
+  \item All fonts must be embedded in the PDF file --- \textbf{ this includes your figures.}
+  \item Modifications to the style sheet (or your document) in an effort to avoid extra page charges are NOT allowed.
+  \item No type 3 fonts may be used (even in illustrations).
+  \item Your title must follow US capitalization rules.
+  \item \LaTeX{} documents must use the Times or Nimbus font package (do not use Computer Modern for the text of your paper).
+  \item No \LaTeX{} 209 documents may be used or submitted.
+  \item Fonts that require non-English language support (CID and Identity-H) must be converted to outlines or removed from the document (even if they are in a graphics file embedded in the document).
+  \item Two-column format in AAAI style is required for all papers.
+  \item The paper size for final submission must be US letter. No exceptions.
+  \item The source file must exactly match the PDF.
+  \item The document margins must be as specified in the formatting instructions.
+  \item The number of pages and the file size must be as specified for your event.
+  \item No document may be password protected.
+  \item Neither the PDFs nor the source may contain any embedded links or bookmarks.
+  \item Your source and PDF must not have any page numbers, footers, or headers.
+  \item Your PDF must be compatible with Acrobat 5 or higher.
+  \item Your \LaTeX{} source file (excluding references) must consist of a \textbf{single} file (use of the ``input" command is not allowed.
+  \item Your graphics must be sized appropriately outside of \LaTeX{} (do not use the ``clip" command) .
 \end{itemize}
 
 If you do not follow the above requirements, it is likely that we will be unable to publish your paper.
@@ -118,11 +130,11 @@ If you do not follow the above requirements, it is likely that we will be unable
 \section{What Files to Submit}
 You must submit the following items to ensure that your paper is published:
 \begin{itemize}
-    \item A fully-compliant PDF file.
-    \item Your  \LaTeX{}  source file submitted as a \textbf{single} .tex file (do not use the ``input" command to include sections of your paper --- every section must be in the single source file). The only exception is the bibliography, which you may include separately. Your source must compile on our system, which includes the standard \LaTeX{} support files.
-    \item All your graphics files.
-    \item The \LaTeX{}-generated files (e.g. .aux and .bib file, etc.) for your compiled source.
-    \item All the nonstandard style files (ones not commonly found in standard \LaTeX{} installations) used in your document (including, for example, old algorithm style files). If in doubt, include it.
+  \item A fully-compliant PDF file.
+  \item Your  \LaTeX{}  source file submitted as a \textbf{single} .tex file (do not use the ``input" command to include sections of your paper --- every section must be in the single source file). The only exception is the bibliography, which you may include separately. Your source must compile on our system, which includes the standard \LaTeX{} support files.
+  \item All your graphics files.
+  \item The \LaTeX{}-generated files (e.g. .aux and .bib file, etc.) for your compiled source.
+  \item All the nonstandard style files (ones not commonly found in standard \LaTeX{} installations) used in your document (including, for example, old algorithm style files). If in doubt, include it.
 \end{itemize}
 
 Your \LaTeX{} source will be reviewed and recompiled on our system (if it does not compile, you may incur late fees).   \textbf{Do not submit your source in multiple text files.} Your single \LaTeX{} source file must include all your text, your bibliography (formatted using aaai.bst), and any custom macros. Accompanying this source file, you must also supply any nonstandard (or older) referenced style files and all your referenced graphics files.
@@ -143,46 +155,46 @@ Leave the setcounter for section number depth commented out and set at 0 unless 
 
 
 \begin{quote}
-    \begin{small}
-        \textbackslash documentclass[letterpaper]{article}\\
-        \% \textit{Required Packages}\\
-        \textbackslash usepackage\{aaai\}\\
-        \textbackslash usepackage\{times\}\\
-        \textbackslash usepackage\{helvet\}\\
-        \textbackslash usepackage\{courier\}\\
-        \textbackslash setlength\{\textbackslash pdfpagewidth\}\{8.5in\}
-        \textbackslash setlength\{\textbackslash pdfpageheight\}\{11in\}\\
-        \%\%\%\%\%\%\%\%\%\%\\
-        \% \textit{PDFINFO for PDF\LaTeX{}}\\
-        \% Uncomment and complete the following for metadata (your paper must compile with PDF\LaTeX{})\\
-        \textbackslash pdfinfo\{\\
-        /Title (Input Your Paper Title Here)\\
-        /Author (John Doe, Jane Doe)\\
-        /Keywords (Input your paper's keywords in this optional area)\\
-        \}\\
-        \%\%\%\%\%\%\%\%\%\%\\
-        \% \textit{Section Numbers}\\
-        \% Uncomment if you want to use section numbers\\
-        \% and change the 0 to a 1 or 2\\
-        \% \textbackslash setcounter\{secnumdepth\}\{0\}\\
-        \%\%\%\%\%\%\%\%\%\%\\
-        \% \textit{Title, Author, and Address Information}\\
-        \textbackslash title\{Title\}\\
-        \textbackslash author\{Author 1 \textbackslash and Author 2\textbackslash\textbackslash \\
-        Address line\textbackslash\textbackslash\\ Address line\textbackslash\textbackslash \\
-        \textbackslash And\\
-        Author 3\textbackslash\textbackslash\\ Address line\textbackslash\textbackslash\\ Address line\}\\
-        \%\%\%\%\%\%\%\%\%\%\\
-        \% \textit{Body of Paper Begins}\\
-        \textbackslash begin\{document\}\\
-        \textbackslash maketitle\\
-        ...\\
-        \%\%\%\%\%\%\%\%\%\%\\
-        \% \textit{References and End of Paper}\\
-        \textbackslash bibliography\{Bibliography-File\}\\
-        \textbackslash bibliographystyle\{aaai\}\\
-        \textbackslash end\{document\}
-    \end{small}
+  \begin{small}
+    \textbackslash documentclass[letterpaper]{article}\\
+    \% \textit{Required Packages}\\
+    \textbackslash usepackage\{aaai\}\\
+    \textbackslash usepackage\{times\}\\
+    \textbackslash usepackage\{helvet\}\\
+    \textbackslash usepackage\{courier\}\\
+    \textbackslash setlength\{\textbackslash pdfpagewidth\}\{8.5in\}
+    \textbackslash setlength\{\textbackslash pdfpageheight\}\{11in\}\\
+    \%\%\%\%\%\%\%\%\%\%\\
+    \% \textit{PDFINFO for PDF\LaTeX{}}\\
+    \% Uncomment and complete the following for metadata (your paper must compile with PDF\LaTeX{})\\
+    \textbackslash pdfinfo\{\\
+    /Title (Input Your Paper Title Here)\\
+    /Author (John Doe, Jane Doe)\\
+    /Keywords (Input your paper's keywords in this optional area)\\
+    \}\\
+    \%\%\%\%\%\%\%\%\%\%\\
+    \% \textit{Section Numbers}\\
+    \% Uncomment if you want to use section numbers\\
+    \% and change the 0 to a 1 or 2\\
+    \% \textbackslash setcounter\{secnumdepth\}\{0\}\\
+    \%\%\%\%\%\%\%\%\%\%\\
+    \% \textit{Title, Author, and Address Information}\\
+    \textbackslash title\{Title\}\\
+    \textbackslash author\{Author 1 \textbackslash and Author 2\textbackslash\textbackslash \\
+    Address line\textbackslash\textbackslash\\ Address line\textbackslash\textbackslash \\
+    \textbackslash And\\
+    Author 3\textbackslash\textbackslash\\ Address line\textbackslash\textbackslash\\ Address line\}\\
+    \%\%\%\%\%\%\%\%\%\%\\
+    \% \textit{Body of Paper Begins}\\
+    \textbackslash begin\{document\}\\
+    \textbackslash maketitle\\
+    ...\\
+    \%\%\%\%\%\%\%\%\%\%\\
+    \% \textit{References and End of Paper}\\
+    \textbackslash bibliography\{Bibliography-File\}\\
+    \textbackslash bibliographystyle\{aaai\}\\
+    \textbackslash end\{document\}
+  \end{small}
 \end{quote}
 
 \subsection{Inserting Document Metadata with \LaTeX{}}
@@ -199,45 +211,45 @@ If your paper includes illustrations that are not compatible with PDF\TeX{} (suc
 After the preamble above, you should prepare your paper as follows:
 
 \begin{quote}
-    \begin{small}
-        \textbackslash begin\{document\}\\
-        \textbackslash maketitle\\
-        ...\\
-        \textbackslash bibliography\{Bibliography-File\}\\
-        \textbackslash bibliographystyle\{aaai\}\\
-        \textbackslash end\{document\}\\
-    \end{small}
+  \begin{small}
+    \textbackslash begin\{document\}\\
+    \textbackslash maketitle\\
+    ...\\
+    \textbackslash bibliography\{Bibliography-File\}\\
+    \textbackslash bibliographystyle\{aaai\}\\
+    \textbackslash end\{document\}\\
+  \end{small}
 \end{quote}
 \subsection{Incompatible Packages}
 The following packages are incompatible with aaai.sty and/or aaai.bst and must not be used (this list is not exhaustive --- there are others as well):
 \begin{itemize}
-    \item hyperref
-    \item natbib
-    \item geometry
-    \item titlesec
-    \item layout
-    \item caption
-    \item titlesec
-    \item T1 fontenc package (install the CM super fonts package instead)
+  \item hyperref
+  \item natbib
+  \item geometry
+  \item titlesec
+  \item layout
+  \item caption
+  \item titlesec
+  \item T1 fontenc package (install the CM super fonts package instead)
 \end{itemize}
 
 \subsection{Illegal Commands}
 The following commands may not be used in your paper:
 \begin{itemize}
-    \item \textbackslash input
-    \item \textbackslash vspace (when used before or after a section or subsection)
-    \item \textbackslash addtolength
-    \item \textbackslash columnsep
-    \item \textbackslash top margin (or text height or addsidemargin or even side margin)
+  \item \textbackslash input
+  \item \textbackslash vspace (when used before or after a section or subsection)
+  \item \textbackslash addtolength
+  \item \textbackslash columnsep
+  \item \textbackslash top margin (or text height or addsidemargin or even side margin)
 \end{itemize}
 
 \subsection{Paper Size, Margins, and Column Width}
 Papers must be formatted to print in two-column format on 8.5 x 11 inch US letter-sized paper. The margins must be exactly as follows:
 \begin{itemize}
-    \item Top margin: .75 inches
-    \item Left margin: .75 inches
-    \item Right margin: .75 inches
-    \item Bottom margin: 1.25 inches
+  \item Top margin: .75 inches
+  \item Left margin: .75 inches
+  \item Right margin: .75 inches
+  \item Bottom margin: 1.25 inches
 \end{itemize}
 
 
@@ -289,47 +301,47 @@ Your title must appear in mixed case (nouns, pronouns, and verbs are capitalized
 Author information can be set in a number of different styles, depending on the number of authors and the number of affiliations you need to display. For several authors from the same institution, use \textbackslash and:
 
 \begin{quote}
-    \begin{small}
-        \textbackslash author\{Author 1 \textbackslash and  ...  \textbackslash and Author \textit{n}\textbackslash \textbackslash  \\
-        Address line \textbackslash \textbackslash ~... \textbackslash \textbackslash ~Address line\}
-    \end{small}
+  \begin{small}
+    \textbackslash author\{Author 1 \textbackslash and  ...  \textbackslash and Author \textit{n}\textbackslash \textbackslash  \\
+    Address line \textbackslash \textbackslash ~... \textbackslash \textbackslash ~Address line\}
+  \end{small}
 \end{quote}
 
 \noindent If the names do not fit well on one line use:
 
 \begin{quote}
-    \begin{small}
-        \textbackslash author\{Author 1\}\textbackslash \textbackslash \\ \{\textbackslash bf Author 2\}\textbackslash \textbackslash ~
-        ... \textbackslash \textbackslash ~\{\textbackslash bf Author \textit{n}\}\textbackslash \textbackslash \\
-        Address line \textbackslash \textbackslash ~ ... \textbackslash \textbackslash ~ Address line\}
-    \end{small}
+  \begin{small}
+    \textbackslash author\{Author 1\}\textbackslash \textbackslash \\ \{\textbackslash bf Author 2\}\textbackslash \textbackslash ~
+    ... \textbackslash \textbackslash ~\{\textbackslash bf Author \textit{n}\}\textbackslash \textbackslash \\
+    Address line \textbackslash \textbackslash ~ ... \textbackslash \textbackslash ~ Address line\}
+  \end{small}
 \end{quote}
 
 \noindent For authors from different institutions, use \textbackslash And:
 
 \begin{quote}
-    \begin{small}
-        \textbackslash author\{Author 1\textbackslash \textbackslash ~ Address line \textbackslash \textbackslash ~...  \textbackslash \textbackslash ~ Address line
-        \textbackslash And  ...
-        \textbackslash And
-        Author \textit{n}\textbackslash \textbackslash \\ Address line\textbackslash \textbackslash ~
-        ... \textbackslash \textbackslash ~
-        Address line\}
-    \end{small}
+  \begin{small}
+    \textbackslash author\{Author 1\textbackslash \textbackslash ~ Address line \textbackslash \textbackslash ~...  \textbackslash \textbackslash ~ Address line
+    \textbackslash And  ...
+    \textbackslash And
+    Author \textit{n}\textbackslash \textbackslash \\ Address line\textbackslash \textbackslash ~
+    ... \textbackslash \textbackslash ~
+    Address line\}
+  \end{small}
 \end{quote}
 
 \noindent To start a separate ``row" of authors, use \textbackslash AND:
 \begin{quote}
-    \begin{small}
-        \textbackslash author\{Author 1\textbackslash\textbackslash ~ Address line \textbackslash\textbackslash ~
-        ...  \textbackslash \textbackslash ~ Address line\textbackslash\textbackslash \\
-        \textbackslash AND\\
-        Author 2 \textbackslash\textbackslash ~ Address line \textbackslash\textbackslash ~
-        ...  \textbackslash \textbackslash ~ Address line\textbackslash\textbackslash \\
-        \textbackslash And\\
-        Author 3 \textbackslash\textbackslash ~ Address line \textbackslash\textbackslash ~
-        ...  \textbackslash \textbackslash ~ Address line\textbackslash\textbackslash \\\}
-    \end{small}
+  \begin{small}
+    \textbackslash author\{Author 1\textbackslash\textbackslash ~ Address line \textbackslash\textbackslash ~
+    ...  \textbackslash \textbackslash ~ Address line\textbackslash\textbackslash \\
+    \textbackslash AND\\
+    Author 2 \textbackslash\textbackslash ~ Address line \textbackslash\textbackslash ~
+    ...  \textbackslash \textbackslash ~ Address line\textbackslash\textbackslash \\
+    \textbackslash And\\
+    Author 3 \textbackslash\textbackslash ~ Address line \textbackslash\textbackslash ~
+    ...  \textbackslash \textbackslash ~ Address line\textbackslash\textbackslash \\\}
+  \end{small}
 \end{quote}
 
 \noindent If the title and author information does not fit in the area allocated, place
@@ -346,10 +358,10 @@ Any credits to a sponsoring agency should appear in the acknowledgments section,
 \textbackslash thanks in either the \textbackslash author or \textbackslash title commands.
 For example:
 \begin{quote}
-    \begin{small}
-        \textbackslash title\{Very Important Results in AI\textbackslash thanks\{This work is
-        supported by everybody.\}\}
-    \end{small}
+  \begin{small}
+    \textbackslash title\{Very Important Results in AI\textbackslash thanks\{This work is
+    supported by everybody.\}\}
+  \end{small}
 \end{quote}
 Multiple \textbackslash thanks commands can be given. Each will result in a separate footnote indication in the author or title with the corresponding text at the botton of the first column of the document. Note that the \textbackslash thanks command is fragile. You will need to use \textbackslash protect.
 
@@ -372,7 +384,7 @@ Citations within the text should include the author's last name and year, for ex
 Long quotations and extracts should be indented ten points from the left and right margins.
 
 \begin{quote}
-    This is an example of an extract or quotation. Note the indent on both sides. Quotation marks are not necessary if you offset the text in a block like this, and properly identify and cite the quotation in the text.
+  This is an example of an extract or quotation. Note the indent on both sides. Quotation marks are not necessary if you offset the text in a block like this, and properly identify and cite the quotation in the text.
 
 \end{quote}
 
@@ -429,22 +441,22 @@ You must embed all fonts in your graphics before including them in your LaTeX do
 The aaai.sty file includes a set of definitions for use in formatting references with BibTeX. These definitions make the bibliography style fairly close to the one specified below. To use these definitions, you also need the BibTeX style file ``aaai.bst," available in the author kit on the AAAI web site. Then, at the end of your paper but before \textbackslash end{document}, you need to put the following lines:
 
 \begin{quote}
-    \begin{small}
-        \textbackslash bibliographystyle\{aaai\}
-        \textbackslash bibliography\{bibfile1,bibfile2,...\}
-    \end{small}
+  \begin{small}
+    \textbackslash bibliographystyle\{aaai\}
+    \textbackslash bibliography\{bibfile1,bibfile2,...\}
+  \end{small}
 \end{quote}
 
 The list of files in the \textbackslash  bibliography command should be the names of your BibTeX source files (that is, the .bib files referenced in your paper).
 
 The following commands are available for your use in citing references:
 \begin{quote}
-    \begin{small}
-        \textbackslash cite: Cites the given reference(s) with a full citation. This appears as ``(Author Year)'' for one reference, or ``(Author Year; Author Year)'' for multiple references.\\
-        \textbackslash shortcite: Cites the given reference(s) with just the year. This appears as ``(Year)'' for one reference, or ``(Year; Year)'' for multiple references.\\
-        \textbackslash citeauthor: Cites the given reference(s) with just the author name(s) and no parentheses.\\
-        \textbackslash citeyear: Cites the given reference(s) with just the date(s) and no parentheses.
-    \end{small}
+  \begin{small}
+    \textbackslash cite: Cites the given reference(s) with a full citation. This appears as ``(Author Year)'' for one reference, or ``(Author Year; Author Year)'' for multiple references.\\
+    \textbackslash shortcite: Cites the given reference(s) with just the year. This appears as ``(Year)'' for one reference, or ``(Year; Year)'' for multiple references.\\
+    \textbackslash citeauthor: Cites the given reference(s) with just the author name(s) and no parentheses.\\
+    \textbackslash citeyear: Cites the given reference(s) with just the date(s) and no parentheses.
+  \end{small}
 \end{quote}
 
 \textbf{Warning:} The aaai.sty file is incompatible with the hyperref and natbib packages. If you use either, your references will be garbled.
@@ -480,10 +492,10 @@ Clancey, W. J. 1986a. The Engineering of Qualitative Models. Forthcoming.
 \section{Producing Reliable PDF\\Documents with \LaTeX{}}
 Generally speaking, PDF files are platform independent and accessible to everyone. When creating a paper for a proceedings or publication in which many PDF documents must be merged and then printed on high-resolution PostScript RIPs, several requirements must be met that are not normally of concern. Thus to ensure that your paper will look like it does when printed on your own machine, you must take several precautions:
 \begin{itemize}
-    \item Use type 1 fonts (not type 3 fonts)
-    \item Use only standard Times, Nimbus, and CMR font packages (not fonts like F3 or fonts with tildes in the names or fonts---other than Computer Modern---that are created for specific point sizes, like Times\~{}19) or fonts with strange combinations of numbers and letters
-    \item Embed all fonts when producing the PDF
-    \item Do not use the [T1]{fontenc} package (install the CM super fonts package instead)
+  \item Use type 1 fonts (not type 3 fonts)
+  \item Use only standard Times, Nimbus, and CMR font packages (not fonts like F3 or fonts with tildes in the names or fonts---other than Computer Modern---that are created for specific point sizes, like Times\~{}19) or fonts with strange combinations of numbers and letters
+  \item Embed all fonts when producing the PDF
+  \item Do not use the [T1]{fontenc} package (install the CM super fonts package instead)
 \end{itemize}
 
 \subsection{Creating Output Using PDF\LaTeX{} Is Required}
@@ -522,11 +534,11 @@ Submitting your files to AAAI is a two-step process. It is explained fully in th
 If you have any questions about the preparation or submission of your paper as instructed in this document, please contact AAAI Press at the address given below. If you have technical questions about implementation of the aaai style file, please contact an expert at your site. We do not provide technical support for \LaTeX{} or any other software package. To avoid problems, please keep your paper simple, and do not incorporate complicated macros and style files.
 
 \begin{quote}
-    \noindent AAAI Press\\
-    2275 East Bayshore Road, Suite 160\\
-    Palo Alto, California 94303\\
-    \textit{Telephone:} (650) 328-3123\\
-    \textit{E-mail:} See the submission instructions for your particular conference or event.
+  \noindent AAAI Press\\
+  2275 East Bayshore Road, Suite 160\\
+  Palo Alto, California 94303\\
+  \textit{Telephone:} (650) 328-3123\\
+  \textit{E-mail:} See the submission instructions for your particular conference or event.
 \end{quote}
 
 \section{Additional Resources}

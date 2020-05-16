@@ -30,25 +30,28 @@ class AdditiveHeuristic(Heuristic):
 
             last_state = reachable
 
-            for a in actions:
-                if a.positive_preconditions <= last_state:
-                    new_reachable = a.add_effects - reachable
-                    for eff in new_reachable:
-                        if eff in costs:
-                            old_costs = costs[eff]
-                            costs[eff] = min(
-                                sum(costs[pre] for pre in a.positive_preconditions) + 1, costs[eff]
+            for action in actions:
+                if action.positive_preconditions.issubset(last_state):
+                    new_reachable = action.add_effects.difference(reachable)
+                    for effect in new_reachable:
+                        if effect in costs:
+                            old_cost = costs[effect]
+                            costs[effect] = min(
+                                sum(costs[pre] for pre in action.positive_preconditions) + 1,
+                                old_cost,
                             )
-                            if costs[eff] != old_costs:
+                            if costs[effect] != old_cost:
                                 pass
                         else:
-                            costs[eff] = sum(costs[pre] for pre in a.positive_preconditions) + 1
+                            costs[effect] = (
+                                sum(costs[pre] for pre in action.positive_preconditions) + 1
+                            )
                     reachable = reachable.union(new_reachable)
         return float("inf")
 
 
 tsp = os.path.join(dir_path, "../examples/tsp/tsp.pddl")
-pb1_tsp = os.path.join(dir_path, "../examples/tsp/pb1.pddl")
+pb1_tsp = os.path.join(dir_path, "../examples/tsp/pb2.pddl")
 
 
 def parse_domain_problem(domain, problem):

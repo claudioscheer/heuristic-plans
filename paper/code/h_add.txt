@@ -1,0 +1,25 @@
+from pddl.heuristic import Heuristic
+
+class AdditiveHeuristic(Heuristic):
+  def h(self, actions, state, goals):
+    reachable = state
+    goals_missing = goals[0]
+    goals_reached = None
+    last_state = None
+    add = 0
+    costs = {p: 0 for p in state} |\label{line:initial_costs:h_add_python}|
+    while last_state != reachable:
+      goals_reached = goals_missing.intersection(reachable) |\label{line:get_goal_reached:h_add_python}|
+      if goals_reached:
+        add += sum(costs[g] for g in goals_reached) |\label{line:reached_goal:h_add_python}|
+        goals_missing = goals_missing.difference(goals_reached)
+      if not goals_missing:
+        return add |\label{line:return_add:h_add_python}|
+      last_state = reachable
+      for action in actions:
+        if action.positive_preconditions.issubset(last_state):
+          new_reachable = action.add_effects.difference(reachable) |\label{line:new_reachable:h_add_python}|
+          for effect in new_reachable:
+            costs[effect] = sum(costs[pre] for pre in action.positive_preconditions) + 1 |\label{line:add_effect_cost:h_add_python}|
+          reachable = reachable.union(new_reachable)
+    return float("inf") |\label{line:return_inf:h_add_python}|
