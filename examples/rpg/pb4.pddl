@@ -1,0 +1,50 @@
+(define (problem pb4)
+    (:domain rpg)
+
+    (:objects
+        room_1 room_2 room_3 room_4 room_5
+        room_6 room_7 room_8 room_9 room_10 - room
+        hero_1 - hero
+    )
+
+    (:init
+        (hero_at hero_1 room_1)
+        (empty_handed hero_1)
+        (monster_angry room_4)
+        (monster_angry room_7)
+        (sword_at room_3)
+        (sword_at room_6)
+        (trap_armed room_5)
+        (trap_armed room_8)
+        ; (valid_move room_1 room_2)
+        (valid_move room_1 room_6)
+        ; (valid_move room_2 room_3)
+        ; (valid_move room_2 room_7)
+        ; (valid_move room_2 room_1)
+        (valid_move room_3 room_4)
+        (valid_move room_3 room_8)
+        ; (valid_move room_3 room_2)
+        (valid_move room_4 room_5)
+        ; (valid_move room_4 room_9)
+        (valid_move room_4 room_3)
+        (valid_move room_5 room_10)
+        (valid_move room_5 room_4)
+        (valid_move room_6 room_1)
+        (valid_move room_6 room_7)
+        ; (valid_move room_7 room_2)
+        (valid_move room_7 room_8)
+        (valid_move room_7 room_6)
+        (valid_move room_8 room_3)
+        (valid_move room_8 room_7)
+        ; (valid_move room_8 room_9)
+        ; (valid_move room_9 room_4)
+        ; (valid_move room_9 room_10)
+        ; (valid_move room_9 room_8)
+        (valid_move room_10 room_5)
+        ; (valid_move room_10 room_9)
+    )
+
+    (:goal (and
+        (hero_at hero_1 room_10)
+    ))
+)
