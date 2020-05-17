@@ -1,0 +1,13 @@
+def validate(self, actions, initial_state, goals, plan):
+  state = initial_state
+  for line in plan: |\label{line:loop_plan:plan_validation}|
+    for action in actions: |\label{line:loop_actions:plan_validation}|
+      if line.parameters == action.parameters: |\label{line:parameters:plan_validation}|
+        if applicable(
+          state, (action.positive_preconditions, action.negative_preconditions)
+        ):
+          state = apply(state, (action.add_effects, action.del_effects))
+          break
+
+  goals_reached = goals[0].intersection(state)
+  return goals_reached == goals[0]

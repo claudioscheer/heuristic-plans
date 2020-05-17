@@ -54,7 +54,7 @@
 \end{abstract}
 
 
-\section{Domain}
+\section{Domains}
 Six domains were tested in the implementations. In this section, I explain this domains.
 
 \subsection{Blocksworld}
@@ -99,6 +99,26 @@ When a goal is reached in the current reachable state (line\ref{line:get_goal_re
 After reaching all the goals, the variable \textit{add} is returned (line~\ref{line:return_add:h_add_python}). If some goal cannot be reached, at some point in the execution, the previous state will be equal to the reachable state, and then return $\inf$ (line~\ref{line:return_inf:h_add_python}).
 
 The first step to get the next reachable state is to filter only the actions applicable to the current state and obtain the effects of those actions (line~\ref{line:new_reachable:h_add_python}). After that, the cost of each effect is calculated and added to the variable \textit{cost} (line~\ref{line:add_effect_cost:h_add_python}).
+
+
+\section{Plan Validation}
+
+In some scenarios, it is necessary to validade whether a given plan is valid or not. Listing~\ref{lst:plan_validation} shows a Python code for performing plan validation.
+
+\lstinputlisting[caption={Plan validation implementation}, style=pythonstyle, label=lst:plan_validation, escapechar=|]{code/plan_validation.txt}
+
+The function \textit{validate} takes as parameters the actions that can be applied to the state, the initial state, the goals and the plan to be validated. An example of a plan to be validated is shown in Listing~\ref{lst:plan_example}.
+
+\begin{lstlisting}[label=lst:plan_example, caption={Example of a plan}, captionpos=b]
+  (take k1 cc cb p1 l1)
+  (load k1 r1 cc l1)
+  (move r1 l1 l2)
+  ...
+\end{lstlisting}
+
+The main idea of validation is to apply each line of the plan to the state and test whether the goals have been reached or not. In lines~\ref{line:loop_plan:plan_validation}~and~\ref{line:loop_actions:plan_validation} of Listing~\ref{lst:plan_validation}, I search for the action that is applicable to the current line of the plan. When the plan line and an action have the same parameters (line~\ref{line:parameters:plan_validation}), I apply the action on the state, interrupt the search for another action and move to the next plan line.
+
+After all the effects of the plan line are applied to the state, I search in the state for the goals. If all goals can be found in the state, the plan is valid.
 
 \section{Formatting Requirements in Brief}
 We need source and PDF files that can be used in a variety of ways and can be output on a variety of devices. AAAI imposes some requirements on your source and PDF files that must be followed. Most of these requirements are based on our efforts to standardize conference manuscript properties and layout. These requirements are as follows, and all papers submitted to AAAI for publication must comply:
