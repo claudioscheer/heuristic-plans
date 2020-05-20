@@ -12,46 +12,76 @@ from pddl.action import Action
 # pylint: enable=import-error
 
 
-class AdditiveHeuristic(Heuristic):
-    def h(self, actions, state, goals):
-        reachable = state
-        goals_missing = goals[0]
-        goals_reached = None
+class FastForwardHeuristic(Heuristic):
+    def build_bs_table(self, actions, initial_state, goal):
+        self.empty_action = Action(
+            "nop", frozenset(), frozenset(), frozenset(), frozenset(), frozenset()
+        )
+        self.bs_table = dict()
+        return self.update_bs_table(actions, initial_state, goal)
+
+    def update_bs_table(self, actions, initial_state, goal):
+        positive_g, negative_g = goal
+        if not positive_g:
+            return 0
+        reachable = set(initial_state)
+        missing_positive_g = set(positive_g)
         last_state = None
+        # Everything in the initial state costs 0.
+        t_add = {p: 0 for p in initial_state}
         add = 0
-        costs = {p: 0 for p in state}
         while last_state != reachable:
-            goals_reached = goals_missing.intersection(reachable)
-            if goals_reached:
-                add += sum(costs[g] for g in goals_reached)
-                goals_missing = goals_missing.difference(goals_reached)
-            if not goals_missing:
-                return add
-
-            last_state = reachable
-
-            for action in actions:
-                if action.positive_preconditions.issubset(last_state):
-                    new_reachable = action.add_effects.difference(reachable)
-                    for effect in new_reachable:
-                        if effect in costs:
-                            old_cost = costs[effect]
-                            costs[effect] = min(
-                                sum(costs[pre] for pre in action.positive_preconditions) + 1,
-                                old_cost,
+            g_reached = missing_positive_g.intersection(reachable)
+            if g_reached:
+                add += sum(t_add[g] for g in g_reached)
+                missing_positive_g -= g_reached
+                if not missing_positive_g:
+                    return add
+            last_state = set(reachable)
+            for a in actions:
+                if a.positive_preconditions <= last_state:
+                    new_reachable = a.add_effects - reachable
+                    for eff in new_reachable:
+                        if eff in t_add:
+                            old_t_add = t_add[eff]
+                            t_add[eff] = min(
+                                sum(t_add[pre] for pre in a.positive_preconditions) + 1, t_add[eff]
                             )
-                            if costs[effect] != old_cost:
-                                pass
+                            if t_add[eff] != old_t_add:
+                                # best supporter changed
+                                self.bs_table[eff] = a
                         else:
-                            costs[effect] = (
-                                sum(costs[pre] for pre in action.positive_preconditions) + 1
-                            )
-                    reachable = reachable.union(new_reachable)
+                            t_add[eff] = sum(t_add[pre] for pre in a.positive_preconditions) + 1
+                            self.bs_table[eff] = a
+                    reachable.update(new_reachable)
         return float("inf")
+
+    def best_supporter(self, actions, initial_state, g):
+        if g not in self.bs_table.keys():
+            return self.empty_action
+        return self.bs_table[g]
+
+    def h(self, actions, initial_state, goal):
+        # Build best supporter (I've done this for you).
+
+        h_add = self.build_bs_table(actions, initial_state, goal)
+        if h_add == 0:
+            return 0
+
+
+        return len([])
 
 
 tsp = os.path.join(dir_path, "../examples/tsp/tsp.pddl")
-pb1_tsp = os.path.join(dir_path, "../examples/tsp/pb2.pddl")
+pb1_tsp = os.path.join(dir_path, "../examples/tsp/pb1.pddl")
+pb2_tsp = os.path.join(dir_path, "../examples/tsp/pb2.pddl")
+
+dwr = os.path.join(dir_path, "../examples/dwr/dwr.pddl")
+pb1_dwr = os.path.join(dir_path, "../examples/dwr/pb1.pddl")
+pb2_dwr = os.path.join(dir_path, "../examples/dwr/pb2.pddl")
+
+dompteur = os.path.join(dir_path, "../examples/dompteur/dompteur.pddl")
+pb1_dompteur = os.path.join(dir_path, "../examples/dompteur/pb1.pddl")
 
 
 def parse_domain_problem(domain, problem):
@@ -75,5 +105,9 @@ def test_heuristic(domain, problem, h, expected):
     )
 
 
-h = AdditiveHeuristic()
-test_heuristic(tsp, pb1_tsp, h, 8)
+h = FastForwardHeuristic()
+test_heuristic(dwr, pb1_dwr, h, 16)
+test_heuristic(dwr, pb2_dwr, h, 0)
+test_heuristic(tsp, pb1_tsp, h, 5)
+test_heuristic(tsp, pb2_tsp, h, 5)
+test_heuristic(dompteur, pb1_dompteur, h, 2)
