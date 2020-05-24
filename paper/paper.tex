@@ -76,7 +76,7 @@ In a nutshell, this heuristic returns the maximum cost to achieve a goal. From a
 
 In the Listing~\ref{lst:h_max_python}, the function \textit{h} returns the maximum cost to reach the \textit{goals} from an initial \textit{state}, considering a set of possible \textit{actions}.
 
-The first reachable states are the initial states, as shown in line~\ref{line:reachable:h_max_python}. The next two lines define the goals\footnote{The goals received as a parameter are divided into positive and negative. Negative goals are those with the negative sign (\textit{not}) in the PDDL. To perform the heuristic I only consider the positive goal.} and the maximum cost to achieve the goals from the reachable state. Therefore, if all goals are in the initial state, the maximum cost is $0$ and the return in line~\ref{line:while:h_max_python} is \textit{False}.
+The first reachable states are the initial states, as shown in line~\ref{line:reachable:h_max_python}. The next two lines define the goals\footnote{The goals received as a parameter are divided into positive and negative. Negative goals are those with the negative sign (\textit{not}) in the PDDL. In all heuristics, I consider only the positive goals.} and the maximum cost to achieve the goals from the reachable state. Therefore, if all goals are in the initial state, the maximum cost is $0$ and the return in line~\ref{line:while:h_max_python} is \textit{False}.
 
 When the goals are not in the reachable state, the algorithm takes two step:
 
@@ -85,7 +85,7 @@ When the goals are not in the reachable state, the algorithm takes two step:
   \item line~\ref{line:new_reachable:h_max_python}: get the effects from the actions applicable to the current reachable state. Each time the algorithm performs this step, the reachable state becomes larger, that is, it is more likely that the goals are in the reachable state.
 \end{itemize}
 
-At least, in line~\ref{line:test_unreachable:h_max_python}, it is tested whether the new reachable states are the same as the current reachable state. If true, there are no more states to reach and the heuristic has not achieved the goals. Therefore, $\inf$ is returned. When there are more states to test, the maximum cost is increased until all goals are reached.
+Finally, in line~\ref{line:test_unreachable:h_max_python}, it is tested whether the new reachable states are the same as the current reachable state. If \textit{True}, there are no more states to reach and the heuristic has not achieved the goals. Therefore, $\inf$ is returned. When there are more states to test, the maximum cost is increased until all goals are reached.
 
 \subsection{$h_{add}$ heuristic}
 
@@ -93,13 +93,13 @@ In a nutshell, this heuristic returns the sum of all the costs to reach the goal
 
 \lstinputlisting[caption={$h_{add}$ implementation}, style=pythonstyle, label=lst:h_add_python, escapechar=|]{code/h_add.txt}
 
-Similar to the $h_{max}$ heuristic, the first reachable state will be the initial state and the cost of reaching goals that are in the initial state, is $0$ (line~\ref{line:initial_costs:h_add_python}). As we need to add the cost of reaching all goals, it is necessary to maintain a set of all goals that have not yet been achieved.
+Similar to the $h_{max}$ heuristic, the first reachable state will be the initial state and the cost of reaching goals that are in the initial state, is $0$ (line~\ref{line:initial_costs:h_add_python}). As we need to sum the cost of reaching all goals, it is necessary to maintain a set of all goals that have not yet been achieved.
 
-When a goal is reached in the current reachable state (line\ref{line:get_goal_reached:h_add_python}), the cost of all goals reached is added to the variable \textit{add}, as shown in line~\ref{line:reached_goal:h_add_python}.
+When a goal is reached in the current reachable state (line~\ref{line:get_goal_reached:h_add_python}), the cost of all goals reached is added to the variable \textit{add}, as shown in line~\ref{line:reached_goal:h_add_python}.
 
 After reaching all the goals, the variable \textit{add} is returned (line~\ref{line:return_add:h_add_python}). If some goal cannot be reached, at some point in the execution, the previous state will be equal to the reachable state, and then return $\inf$ (line~\ref{line:return_inf:h_add_python}).
 
-The first step to get the next reachable state is to filter only the actions applicable to the current state and obtain the effects of those actions (line~\ref{line:new_reachable:h_add_python}). After that, the cost of each effect is calculated and added to the variable \textit{costs} (line~\ref{line:add_effect_cost:h_add_python}). The cost of the effect will be the sum of the costs of the preconditions plus 1, because it is the next step in the search tree.
+To get the next reachable state I need to filter only the actions applicable to the current state and obtain the effects of those actions (line~\ref{line:new_reachable:h_add_python}). After that, the cost of each effect is calculated and added to the variable \textit{costs} (line~\ref{line:add_effect_cost:h_add_python}). The cost of the effect will be the sum of the costs of the preconditions plus 1, because it is the next step in the search tree.
 
 
 \section{Plan Validation}
@@ -117,14 +117,16 @@ The function \textit{validate} takes as parameters the actions that can be appli
   ...
 \end{lstlisting}
 
-The main idea of validation is to apply each line of the plan to the state and test whether the goals have been reached or not. In lines~\ref{line:loop_plan:plan_validation}~and~\ref{line:loop_actions:plan_validation} of Listing~\ref{lst:plan_validation}, I search for the action that is applicable to the current line of the plan. When the plan line and an action have the same parameters (line~\ref{line:parameters:plan_validation}), I apply the action on the state, interrupt the search for another action and move to the next plan line.
+The main idea of a plan validation is to apply each line of the plan to the state and test whether the goals have been reached or not. In lines~\ref{line:loop_plan:plan_validation}~and~\ref{line:loop_actions:plan_validation} of Listing~\ref{lst:plan_validation}, I search for the action that is applicable to the current line of the plan. When the plan line and an action have the same parameters (line~\ref{line:parameters:plan_validation}), I apply the action on the state, interrupt the search for another action and move to the next plan line.
 
-After all the effects of the plan line are applied to the state, I search in the state for the goals. If all goals can be found in the state, the plan is valid.
+After all the effects of the plan are applied to the state, I search in the state for the goals. If all goals can be found in the state, the plan is valid.
 
 
 \section{Solver using A* and $h_{max}$}
 
-A solver is responsible for finding the best path to achieve the goal. In STRIPS planning, the best path is the path that performs the least actions to achieve all goals. In this section, I will show how the A* differs from the Dijkstra algorithm and also an algorithm to search for the shortest path using A* search, guided by the $h_{max}$ heuristic.
+A solver is responsible for finding the best path to achieve the goal. We can consider the best path as the path that performs the least actions to achieve all goals. However, the path found can be a local minimum result, that is, there is a better path but the solver cannot see it. The solver would need to keep searching to find that path. This algorithm just searches for a path that reaches all goals, not necessarily the global minimum path.
+
+Hence, in this section, I will show how the A* differs from the Dijkstra algorithm and also an algorithm to search for the shortest path using A* search, guided by the $h_{max}$ heuristic.
 
 \subsection{Dijkstra and A*}
 
@@ -135,7 +137,7 @@ A* is based on the Dijkstra algorithm. In a nutshell, Dijkstra's algorithm searc
   \begin{forest}
     [A (0)
       [B (40)
-          [E (20)]
+          [E (15)]
         ]
         [C (30)
           [D (10)
@@ -147,29 +149,9 @@ A* is based on the Dijkstra algorithm. In a nutshell, Dijkstra's algorithm searc
   \caption{Dijkstra search tree}\label{fig:dijkstra-tree}
 \end{figure}
 
-The distance between cities A and B is 40 kilometers. Therefore, Dijkstra's algorithm will choose the path from city A to C, since the distance is shorter. In the next step, the algorithm have two possible nodes to expand: B and D. As the distance from city C to D is less than city A to B, the algorithm will choose the path from city C to D. Following the same logic, in the end, the algorithm will choose the path from city D to E, reaching the goal.
+The distance between cities A and B is 40 kilometers. Therefore, Dijkstra's algorithm will choose the path from city A to C, since the distance is shorter. In the next step, the algorithm have two possible nodes to expand: A or D. The cost to travel to each of these cities will be the current cost, 30 kilometers, plus the cost to reach A or D. Therefore, the cost to reach cities A or D is 60 and 40, respectively. Now the algorithm has three options: 1) go back and, instead of city C, choose city B, which costs 40; 2) go to city A, which costs 60; 3) go to city D, which costs 40. The algorithm will choose the cheapest path. In this case, let's assume that it arbitrarily chooses B. Following the same logic, the algorithm will have to expand all the nodes until reaching the goal.
 
-From the Dijkstra's algorithm, the A* algorithm adds a heuristic value to the cost of moving from a city to another, for example. In Figure~\ref{fig:a-star-tree}, I show an example of heuristic: the straight line distance between two cities. The straight line between cities C and E, for example, I considered $\inf$, because I cannot travel between these two cities without going through city D.
-
-Now, the distance between cities A and B is 50 kilometers and between cities A and C is 55 kilometers. Therefore, the A* algorithm will choose the path between cities A and B. In the next step, the algorithm chooses the path between B and E, because the distance, considering the heuristic, is shortest. A bad heuristic will guide the A* algorithm to the wrong direction. However, with good heuristics, A* algorithm needs to expand fewer nodes to reach the goal.
-
-\begin{figure}
-  \centering
-  \begin{forest}
-    [A (0)
-      [B (40-10)
-          [E (20-15)]
-        ]
-        [C (30-25)
-          [D (10-7)
-              [E (15-11)]
-            ]
-        ]
-    ]
-  \end{forest}
-  \caption{A* search tree}\label{fig:a-star-tree}
-\end{figure}
-
+To solve this problem, the A* algorithm adds a heuristic value to the cost of moving from a city to another, for example. The heuristic may be the straight line distance between two cities. Now the algorithm can know, for example, that the path from city A to C is longer to reach the goal than from city A to B. A bad heuristic will guide the A* algorithm to the wrong direction. However, with good heuristics, A* algorithm needs to expand fewer nodes to reach the goal.
 
 \subsection{Solver Explanation}
 
