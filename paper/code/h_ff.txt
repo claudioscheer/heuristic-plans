@@ -1,0 +1,31 @@
+from pddl.heuristic import Heuristic
+
+class FastForwardHeuristic(Heuristic):
+  ...
+  def h(self, actions, initial_state, goal):
+    add = self.build_bs_table(actions, initial_state, goal) |\label{line:build_bs_table:h_ff_python}|
+    if add == 0:
+      return 0
+    elif add == float("inf"):
+      return float("inf")
+
+    r_plan = set()
+    actions_already_explored = set()
+    actions_to_explore = [] |\label{line:actions_to_explore:h_ff_python}|
+
+    for g in goal[0]:
+      actions_to_explore.append(self.best_supporter(actions, initial_state, g))
+      actions_already_explored.add(g)
+
+    while actions_to_explore: |\label{line:loop:h_ff_python}|
+      action = actions_to_explore.pop() |\label{line:pop:h_ff_python}|
+      if action.name != "nop" and action not in r_plan: |\label{line:nop:h_ff_python}|
+        for precondition in action.positive_preconditions:
+          if precondition not in actions_already_explored:
+            actions_to_explore.append(
+              self.best_supporter(actions, initial_state, precondition)
+            )
+            actions_already_explored.add(precondition)
+        r_plan.add(action) |\label{line:plan_add:h_ff_python}|
+
+    return len(r_plan) |\label{line:return:h_ff_python}|
