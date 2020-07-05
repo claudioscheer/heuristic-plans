@@ -5,6 +5,7 @@ import time
 
 
 class PDDLPlanner:
+
     def __init__(self, verbose=False, collect_stats=False):
         self.verbose = verbose
         self.collect_benchmark = collect_stats
@@ -15,8 +16,7 @@ class PDDLPlanner:
     # -----------------------------------------------
 
     def solve_file(self, domainfile, problemfile):
-        if self.collect_benchmark:
-            self.stats = PlanningBenchmark().get_instance(domainfile, problemfile)
+        if self.collect_benchmark: self.stats = PlanningBenchmark().get_instance(domainfile,problemfile)
 
         # Parser
         start_time = time.time()
@@ -28,30 +28,23 @@ class PDDLPlanner:
             return [], 0
         # Grounding process
         ground_actions = self.grounding(parser)
-        if self.stats:
-            self.stats.action_space = len(ground_actions)  # compute stats
-        plan = self.solve(
-            ground_actions, parser.state, (parser.positive_goals, parser.negative_goals)
-        )
+        if self.stats: self.stats.action_space = len(ground_actions)  # compute stats
+        plan = self.solve(ground_actions, parser.state, (parser.positive_goals, parser.negative_goals))
         final_time = time.time() - start_time
         if self.verbose:
-            print("Time: " + str(final_time) + "s")
+            print('Time: ' + str(final_time) + 's')
             if plan:
-                print("plan:")
+                print('plan:')
                 for act in plan:
-                    print(
-                        "(" + act.name + "".join(" " + p for p in act.parameters) + ")"
-                    )
+                    print('(' + act.name + ''.join(' ' + p for p in act.parameters) + ')')
             else:
-                print("No plan was found")
-        if self.stats:
-            self.stats.time = final_time
+                print('No plan was found')
+        if self.stats: self.stats.time = final_time
         return plan, final_time
 
     def grounding(self, parser):
         ground_actions = []
-        if self.verbose:
-            start_time = time.time()
+        if self.verbose: start_time = time.time()
         for action in parser.actions:
             for act in action.groundify(parser.objects):
                 ground_actions.append(act)
